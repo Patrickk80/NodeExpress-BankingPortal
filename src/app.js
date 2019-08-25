@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const { accounts, users, writeJSON } = require('./data');
+const accountRoutes = require('./routes/accounts');
+const servicesRoutes = require('./routes/services');
 
 const app = express();
 
@@ -10,29 +12,13 @@ app.set('view engine', 'ejs');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({extended: true}));
+app.use('/account', accountRoutes);
+app.use('/services', servicesRoutes);
 
 app.get('/', (req, res) => {
     res.render('index', {
         title: 'Account Summary',
         accounts
-    });
-});
-
-app.get('/savings', (req, res) => {
-    res.render('account', {
-        account: accounts.savings
-    });
-});
-
-app.get('/checking', (req, res) => {
-    res.render('account', {
-        account: accounts.checking
-    });
-});
-
-app.get('/credit', (req, res) => {
-    res.render('account', {
-        account: accounts.credit
     });
 });
 
@@ -42,34 +28,5 @@ app.get('/profile', (req, res) => {
     });
 });
 
-app.get('/transfer', (req, res) => {
-    res.render('transfer');
-});
-
-app.post('/transfer', (req, res) => {
-    const params = req.body;
-    accounts[params.from].balance -= parseInt(params.amount);
-    accounts[params.to].balance += parseInt(params.amount);
-    writeJSON();
-    res.render('transfer', {
-        message: 'Transfer Completed'
-    });
-});
-
-app.get('/payment', (req, res) => {
-    res.render('payment', {
-        account: accounts.credit
-    });
-});
-
-app.post('/payment', (req,res) => {
-    const params = req.body;
-    accounts.credit.balance -= parseInt(params.amount);
-    accounts.credit.available += parseInt(params.amount);
-    writeJSON();
-    res.render('payment', {
-        message: "Payment Successful",
-        account: accounts.credit });
-});
 
 app.listen(3000, () => console.log('PS project listening on port 3000'))
